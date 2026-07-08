@@ -128,20 +128,25 @@ class GameSession {
   }
 
   assignControls() {
-    const pool = this.players.length >= 4
-      ? ['left', 'right', 'rotate', 'change_shape']
-      : ['left', 'right', 'rotate'];
-    const controls = [];
+    const pool = ['left', 'right', 'rotate', 'change_shape'];
+    let assignments = [];
+    if (this.players.length >= 4) {
+      for (let i = 0; i < this.players.length; i++) {
+        assignments.push(pool[i % pool.length]);
+      }
+    } else {
+      assignments = [...pool];
+      for (let i = assignments.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [assignments[i], assignments[j]] = [assignments[j], assignments[i]];
+      }
+    }
+    this.controlAssignments = {};
     for (let i = 0; i < this.players.length; i++) {
-      controls.push(pool[i % pool.length]);
+      const start = Math.floor(i * pool.length / this.players.length);
+      const end = Math.floor((i + 1) * pool.length / this.players.length);
+      this.controlAssignments[this.players[i].id] = assignments.slice(start, end);
     }
-    for (let i = controls.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [controls[i], controls[j]] = [controls[j], controls[i]];
-    }
-    this.players.forEach((p, i) => {
-      this.controlAssignments[p.id] = controls[i] || 'left';
-    });
   }
 
   start() {
@@ -190,7 +195,7 @@ class GameSession {
     if (!this.currentPiece) return;
     lockPiece(this.board, this.currentPiece.shape, this.pieceRow, this.pieceCol);
     this.currentPiece = null;
-    this.fallIntervalMs = this.fallIntervalMs * 0.2;
+    this.fallIntervalMs = this.fallIntervalMs * 0.98;
     if (isGameWon(this.board)) {
       this.status = 'finished';
       this.stopFallTimer();
@@ -212,8 +217,8 @@ class GameSession {
 
   handleAction(playerId, action) {
     if (this.status !== 'playing' || !this.currentPiece) return false;
-    const allowed = this.controlAssignments[playerId];
-    if (allowed !== action) return false;
+    const allowed = this.controlAssignments[playerId] || [];
+    if (!allowed.includes(action)) return false;
     const shape = this.currentPiece.shape;
     let moved = false;
     if (action === 'left' && sinColision(this.board, shape, this.pieceRow, this.pieceCol - 1)) {

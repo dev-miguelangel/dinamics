@@ -1,7 +1,7 @@
 export interface Player {
   id: string;
   name: string;
-  control: 'left' | 'right' | 'rotate' | 'change_shape' | null;
+  control: string[];
 }
 
 export interface PieceState {

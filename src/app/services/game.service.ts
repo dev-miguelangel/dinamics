@@ -71,7 +71,7 @@ export class GameService {
     this.socket?.emit('restart-game');
   }
 
-  sendAction(action: 'left' | 'right' | 'rotate' | 'change_shape') {
+  sendAction(action: string) {
     this.socket?.emit('player-action', { action });
   }
 

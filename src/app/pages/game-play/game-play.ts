@@ -75,26 +75,34 @@ import { BOARD_ROWS, COLS, SKY_ROWS, TRIANGLE_MASK, CONTROL_LABELS, CONTROL_COLO
             <div class="controls-panel">
               <h3>🎮 Controles</h3>
               @for (p of state.players; track p.id) {
-                <div class="control-card" [class.me]="p.id === playerId()" [style.--ctrl-color]="CONTROL_COLORS[p.control ?? '']">
+                <div class="control-card" [class.me]="p.id === playerId()">
                   <span class="control-name">{{ p.id === playerId() ? '👤 Tú' : '👥 ' + p.name }}</span>
-                  <span class="control-action" [style.background]="CONTROL_COLORS[p.control ?? '']">
-                    {{ CONTROL_LABELS[p.control ?? ''] || '❓ Sin control' }}
-                  </span>
+                  <div class="control-actions">
+                    @for (c of p.control; track c) {
+                      <span class="control-action" [style.background]="CONTROL_COLORS[c]">
+                        {{ CONTROL_LABELS[c] }}
+                      </span>
+                    }
+                  </div>
                 </div>
               }
             </div>
 
-            @if (miControl(); as ctrl) {
+            @if (misControles(); as controles) {
               <div class="action-panel">
-                <p class="action-hint">Tu control: <strong>{{ CONTROL_LABELS[ctrl] }}</strong></p>
-                <button
-                  class="action-btn"
-                  [style.--btn-ctrl]="CONTROL_COLORS[ctrl]"
-                  (mousedown)="enviarAccion(ctrl)"
-                  (touchstart)="enviarAccion(ctrl)"
-                >
-                  {{ CONTROL_LABELS[ctrl] }}
-                </button>
+                <p class="action-hint">Tus controles:</p>
+                <div class="action-buttons">
+                  @for (c of controles; track c) {
+                    <button
+                      class="action-btn"
+                      [style.--btn-ctrl]="CONTROL_COLORS[c]"
+                      (mousedown)="enviarAccion(c)"
+                      (touchstart)="enviarAccion(c)"
+                    >
+                      {{ CONTROL_LABELS[c] }}
+                    </button>
+                  }
+                </div>
               </div>
             }
           </div>
@@ -164,14 +172,16 @@ import { BOARD_ROWS, COLS, SKY_ROWS, TRIANGLE_MASK, CONTROL_LABELS, CONTROL_COLO
     .sidebar { width: 280px; flex-shrink: 0; display: flex; flex-direction: column; gap: 1rem; }
     .sidebar .controls-panel { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 1rem; }
     .sidebar .controls-panel h3 { margin: 0 0 0.75rem; font-size: 0.95rem; }
-    .sidebar .control-card { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; border-radius: 8px; background: rgba(255,255,255,0.03); }
+    .sidebar .control-card { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; margin-bottom: 0.5rem; border-radius: 8px; background: rgba(255,255,255,0.03); gap: 0.5rem; }
     .sidebar .control-card.me { background: rgba(108,92,231,0.15); border: 1px solid rgba(108,92,231,0.3); }
-    .sidebar .control-name { font-size: 0.85rem; }
-    .sidebar .control-action { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; color: #fff; font-weight: 600; }
+    .sidebar .control-name { font-size: 0.85rem; flex-shrink: 0; }
+    .sidebar .control-actions { display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: flex-end; }
+    .sidebar .control-action { font-size: 0.75rem; padding: 0.2rem 0.5rem; border-radius: 4px; color: #fff; font-weight: 600; white-space: nowrap; }
 
     .action-panel { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 0.75rem; text-align: center; }
     .action-hint { margin: 0 0 0.5rem; font-size: 0.85rem; }
-    .action-btn { width: 100%; padding: 1rem; font-size: 1.3rem; font-weight: 700; border: none; border-radius: 12px; background: var(--btn-ctrl, #6C5CE7); color: #fff; cursor: pointer; transition: transform 0.1s; touch-action: manipulation; }
+    .action-buttons { display: flex; gap: 0.5rem; }
+    .action-btn { flex: 1; padding: 1rem; font-size: 1.3rem; font-weight: 700; border: none; border-radius: 12px; background: var(--btn-ctrl, #6C5CE7); color: #fff; cursor: pointer; transition: transform 0.1s; touch-action: manipulation; }
     .action-btn:active { transform: scale(0.95); }
     .loading { text-align: center; padding: 4rem; color: var(--text-secondary); }
 
@@ -210,7 +220,7 @@ export class GamePlay {
   protected CONTROL_COLORS = CONTROL_COLORS;
   protected SKY_ROWS = SKY_ROWS;
 
-  protected miControl = computed(() => {
+  protected misControles = computed(() => {
     const state = this.gameState();
     const pid = this.playerId();
     if (!state || !pid) return null;
@@ -242,7 +252,7 @@ export class GamePlay {
     return this.gameState()?.board[row]?.[col] ? '#6C5CE7' : undefined;
   }
 
-  protected enviarAccion(action: 'left' | 'right' | 'rotate' | 'change_shape') {
+  protected enviarAccion(action: string) {
     this.gameService.sendAction(action);
   }
 
