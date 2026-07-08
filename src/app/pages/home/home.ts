@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DynamicaCard } from '../../shared/dynamica-card/dynamica-card';
 import { DinamicasService } from '../../services/dinamicas.service';
@@ -15,7 +15,12 @@ import { DinamicasService } from '../../services/dinamicas.service';
         confianza, creatividad y colaboración.
       </p>
       <div class="hero__actions">
-        <a routerLink="/juego/crear" class="btn btn--primary">🎮 Jugar Ahora</a>
+        @if (mostrarOpciones()) {
+          <a routerLink="/juego/crear" class="btn btn--primary">Crear Partida</a>
+          <a routerLink="/juego/unirse" class="btn btn--secondary">Unirse a Partida</a>
+        } @else {
+          <button (click)="mostrarOpciones.set(true)" class="btn btn--primary">🎮 Jugar Ahora</button>
+        }
         <a routerLink="/dinamicas" class="btn btn--secondary">Explorar Dinámicas</a>
       </div>
     </section>
@@ -211,6 +216,8 @@ import { DinamicasService } from '../../services/dinamicas.service';
 })
 export class Home {
   private service = inject(DinamicasService);
+
+  protected mostrarOpciones = signal(false);
 
   protected destacadas = () => this.service.dinamicas().slice(0, 6);
 }
