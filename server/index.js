@@ -95,10 +95,11 @@ function isGameWon(board) {
 }
 
 class GameSession {
-  constructor(id, maxPlayers) {
+  constructor(id, maxPlayers, speedMultiplier = 0.98) {
     this.id = id;
     this.joinCode = id.substring(0, 6).toUpperCase();
     this.maxPlayers = maxPlayers;
+    this.speedMultiplier = speedMultiplier;
     this.players = [];
     this.status = 'waiting';
     this.board = createEmptyBoard();
@@ -195,7 +196,7 @@ class GameSession {
     if (!this.currentPiece) return;
     lockPiece(this.board, this.currentPiece.shape, this.pieceRow, this.pieceCol);
     this.currentPiece = null;
-    this.fallIntervalMs = this.fallIntervalMs * 0.98;
+    this.fallIntervalMs = this.fallIntervalMs * this.speedMultiplier;
     if (isGameWon(this.board)) {
       this.status = 'finished';
       this.stopFallTimer();
@@ -272,9 +273,9 @@ const joinCodeMap = new Map();
 io.on('connection', (socket) => {
   let currentGameId = null;
 
-  socket.on('create-game', ({ maxPlayers }) => {
+  socket.on('create-game', ({ maxPlayers, speedMultiplier }) => {
     const id = uuidv4();
-    const game = new GameSession(id, maxPlayers);
+    const game = new GameSession(id, maxPlayers, speedMultiplier);
     games.set(id, game);
     joinCodeMap.set(game.joinCode, id);
     currentGameId = id;

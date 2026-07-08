@@ -55,8 +55,8 @@ export class GameService {
     this.joinCode.set(null);
   }
 
-  createGame(maxPlayers: number) {
-    this.socket?.emit('create-game', { maxPlayers });
+  createGame(maxPlayers: number, speedMultiplier: number = 0.98) {
+    this.socket?.emit('create-game', { maxPlayers, speedMultiplier });
   }
 
   joinGame(gameId: string, playerName: string) {
