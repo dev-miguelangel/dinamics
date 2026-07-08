@@ -1,0 +1,15 @@
+{
+  "name": "dinamicas-server",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "socket.io": "^4.8.0",
+    "uuid": "^11.0.0"
+  }
+}
