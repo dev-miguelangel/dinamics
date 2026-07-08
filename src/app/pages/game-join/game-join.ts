@@ -1,6 +1,8 @@
 import { Component, ChangeDetectionStrategy, inject, signal, effect, OnDestroy, type EffectRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { GameService } from '../../services/game.service';
 
 @Component({
@@ -62,6 +64,11 @@ export class GameJoin implements OnDestroy {
   private navegarEffect: EffectRef | null = null;
 
   constructor() {
+    const route = inject(ActivatedRoute);
+    const codigoParam = toSignal(route.queryParamMap.pipe(map(p => p.get('codigo'))));
+    const inicial = codigoParam();
+    if (inicial) this.codigo.set(inicial.toUpperCase());
+
     this.gameService.disconnect();
     this.gameService.connect();
 

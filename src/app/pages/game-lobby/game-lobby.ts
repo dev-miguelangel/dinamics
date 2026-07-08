@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, effect, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { GameService } from '../../services/game.service';
 
@@ -12,6 +12,9 @@ import { GameService } from '../../services/game.service';
       <div class="join-info">
         <p class="join-label">Comparte este código con tu equipo:</p>
         <div class="join-code">{{ joinCode() }}</div>
+        <button class="share-btn" (click)="compartir()">
+          {{ compartido() ? '✅ ¡Copiado!' : '📤 Compartir enlace' }}
+        </button>
       </div>
 
       <div class="players">
@@ -29,11 +32,7 @@ import { GameService } from '../../services/game.service';
       </div>
 
       @if (isAnfitrion()) {
-        <button
-          class="btn btn--primary start-btn"
-          (click)="iniciar()"
-          [disabled]="playerCount() < 2"
-        >
+        <button class="btn btn--primary start-btn" (click)="iniciar()" [disabled]="playerCount() < 2">
           {{ playerCount() >= maxPlayers() ? '✅ ¡Todos listos! Iniciar' : '🎮 Iniciar Juego' }}
         </button>
       } @else {
@@ -47,6 +46,8 @@ import { GameService } from '../../services/game.service';
     .join-info { margin-bottom: 2rem; }
     .join-label { color: var(--text-secondary); margin: 0 0 0.75rem; }
     .join-code { font-size: 3rem; font-weight: 800; letter-spacing: 0.5rem; color: var(--primary); background: var(--primary-bg); padding: 0.75rem 1.5rem; border-radius: 12px; display: inline-block; font-family: monospace; }
+    .share-btn { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.6rem 1.25rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--primary); font-size: 0.9rem; font-weight: 600; cursor: pointer; touch-action: manipulation; transition: all 0.2s; }
+    .share-btn:hover { border-color: var(--primary); background: var(--primary-bg); }
     .players { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     .players h2 { margin: 0 0 1rem; font-size: 1.1rem; }
     .players-list { display: flex; flex-direction: column; gap: 0.5rem; }
@@ -66,6 +67,8 @@ export class GameLobby {
 
   protected gameState = this.gameService.gameState;
   protected joinCode = this.gameService.joinCode;
+
+  protected compartido = signal(false);
 
   protected players = computed(() => this.gameState()?.players ?? []);
   protected playerCount = computed(() => this.players().length);
@@ -88,5 +91,20 @@ export class GameLobby {
 
   protected iniciar() {
     this.gameService.startGame();
+  }
+
+  protected compartir() {
+    const codigo = this.joinCode();
+    if (!codigo) return;
+    const url = `${window.location.origin}/juego/unirse?codigo=${codigo}`;
+
+    if ('share' in (navigator as any)) {
+      navigator.share({ title: 'Unirse a dinámica', url }).catch(() => {});
+    } else {
+      (navigator as any).clipboard.writeText(url).then(() => {
+        this.compartido.set(true);
+        setTimeout(() => this.compartido.set(false), 2000);
+      });
+    }
   }
 }

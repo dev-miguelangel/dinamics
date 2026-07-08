@@ -107,6 +107,7 @@ class GameSession {
     this.pieceCol = 0;
     this.fallInterval = null;
     this.controlAssignments = {};
+    this.fallIntervalMs = 2000;
     this.derrota = false;
   }
 
@@ -146,6 +147,7 @@ class GameSession {
   start() {
     this.status = 'playing';
     this.board = createEmptyBoard();
+    this.fallIntervalMs = 2000;
     this.derrota = false;
     this.assignControls();
     const spawned = spawnPiece(this.board);
@@ -160,7 +162,7 @@ class GameSession {
 
   startFallTimer() {
     this.stopFallTimer();
-    this.fallInterval = setInterval(() => this.tick(), 2000);
+    this.fallInterval = setInterval(() => this.tick(), this.fallIntervalMs);
   }
 
   stopFallTimer() {
@@ -188,6 +190,7 @@ class GameSession {
     if (!this.currentPiece) return;
     lockPiece(this.board, this.currentPiece.shape, this.pieceRow, this.pieceCol);
     this.currentPiece = null;
+    this.fallIntervalMs = this.fallIntervalMs * 0.2;
     if (isGameWon(this.board)) {
       this.status = 'finished';
       this.stopFallTimer();
@@ -199,6 +202,7 @@ class GameSession {
       this.currentPiece = spawned.piece;
       this.pieceRow = spawned.row;
       this.pieceCol = spawned.col;
+      this.startFallTimer();
     } else {
       this.derrota = true;
       this.status = 'finished';
