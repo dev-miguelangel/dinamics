@@ -96,8 +96,7 @@ import { BOARD_ROWS, COLS, SKY_ROWS, TRIANGLE_MASK, CONTROL_LABELS, CONTROL_COLO
                     <button
                       class="action-btn"
                       [style.--btn-ctrl]="CONTROL_COLORS[c]"
-                      (mousedown)="enviarAccion(c)"
-                      (touchstart)="enviarAccion(c)"
+                      (pointerdown)="enviarAccion(c)"
                     >
                       {{ CONTROL_LABELS[c] }}
                     </button>
@@ -165,7 +164,7 @@ import { BOARD_ROWS, COLS, SKY_ROWS, TRIANGLE_MASK, CONTROL_LABELS, CONTROL_COLO
     .cell--sky-filled { background: rgba(108,92,231,0.15); border: 1px solid rgba(108,92,231,0.25); }
 
     .cell--tri { background: rgba(108,92,231,0.08); border: 1px solid rgba(108,92,231,0.2); }
-    .cell--tri.filled { background: var(--cell-color, #6C5CE7); border-color: rgba(255,255,255,0.3); box-shadow: 0 0 8px var(--cell-color, #6C5CE7); }
+    .cell--tri.filled { background: var(--cell-color, #6C5CE7); border-color: rgba(255,255,255,0.5); box-shadow: 0 0 8px var(--cell-color, #6C5CE7); }
     .cell--tri.active { background: #f1c40f; border-color: #f39c12; box-shadow: 0 0 12px #f1c40f; animation: pulse 0.8s infinite alternate; }
     @keyframes pulse { from { box-shadow: 0 0 8px #f1c40f; } to { box-shadow: 0 0 16px #f39c12; } }
 
